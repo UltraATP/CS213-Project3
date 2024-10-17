@@ -1,0 +1,25 @@
+Must use Model-View-Controller (MVC) which includes...
+    * LAUNCHER: ClinicManagerMain.java
+        ** Executes the software.
+    * CONTROLLER: ClinicController.java
+        ** Determines action on each button click.
+    * VIEW: clinic-view.fxml
+        ** Creates the UI buttons.
+    * MODEL: clinic, enums & util Packages
+        ** Contains the backend code.
+
+Must use many JavaFX utilities...
+    * TextField
+    * Button
+    * RadioButton
+    * TextArea
+    * TableView
+    * TabPlane
+    * GridPlane
+
+Must comment all java files...
+    * Do NOT comment ClinicManagerMain.java
+    * Do NOT include .fxml files in Javadoc.
+
+Must display proper error messages for invalid inputs.
+No printing out to the terminal.
