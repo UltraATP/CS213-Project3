@@ -9,8 +9,7 @@
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-   <Button mnemonicParsing="false" onAction="#tryButtonClick" prefWidth="57.0" text="Try Me!" />
 
-    <Label fx:id="welcomeText" prefHeight="18.0" prefWidth="193.0" />
-    <Button onAction="#onHelloButtonClick" text="Hello!" />
+    <Label fx:id="welcomeText" prefHeight="44.0" prefWidth="175.0" />
+    <Button onAction="#onHelloButtonClick" prefHeight="26.0" prefWidth="254.0" text="Continue" />
 </VBox>
