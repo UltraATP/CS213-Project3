@@ -9,13 +9,13 @@ import javafx.scene.control.Label;
  */
 public class ClinicManagerController {
 
-    @FXML
-    private Label welcomeText;
+    //@FXML
+    //private Label welcomeText;
 
-    @FXML
-    protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to the Clinic Manager!");
-    }
+    //@FXML
+    //protected void onHelloButtonClick() {
+    //    welcomeText.setText("Welcome to the Clinic Manager!");
+    //}
 
     /**
      * Commands...
@@ -45,19 +45,19 @@ public class ClinicManagerController {
      *         ** Quit program.
      *
      * JavaFX Utilities...
-     *     * TextField
+     *     * TextField [^]
      *         * Def: Allow single-line user input.
-     *     * Button
+     *     * Button [^]
      *         * Def: A clickable control.
-     *     * RadioButton
+     *     * RadioButton [^]
      *         * Def: Checkbox selection from a bunch of choices.
-     *     * TextArea
+     *     * TextArea [^]
      *         * Def: Allow multiple-line user input.
-     *     * TableView
+     *     * TableView [^]
      *         * Def: Display data in a table.
-     *     * TabPane
+     *     * TabPane [^]
      *         * Def: Organize content into tabs.
-     *     * GridPane
+     *     * GridPane [^]
      *         * Def: Allows placement of UI elements in grid.
      *
      * Structure...
