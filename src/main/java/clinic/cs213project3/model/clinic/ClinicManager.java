@@ -801,7 +801,6 @@ public class ClinicManager {
         // Sort providers by profile and print them...
         Sort.sort(providersList);
         print(providersList);
-        //providersList.print();
         System.out.println("\nRotation list for the technicians.");
         // Create technician tracker for linked list...
         technicians.createTracker();

@@ -182,6 +182,15 @@ public class CircularLinkedList {
     }
 
     /**
+     * Method updates the tracker node to the next node in the list.
+     */
+    public void setTrackerNext() {
+        if (tracker != null) {
+            tracker = tracker.next;
+        }
+    }
+
+    /**
      * Searches for the next available technician to attend an appointment.
      * @param appointments The clinic's appointment list.
      * @param room The radiology room of the appointment.
