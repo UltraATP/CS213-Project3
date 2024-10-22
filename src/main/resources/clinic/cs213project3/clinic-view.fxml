@@ -106,7 +106,7 @@
                                     <ToggleGroup fx:id="appointmentType" />
                                  </toggleGroup>
                               </RadioButton>
-                              <RadioButton fx:id="doctorOfficeRadio" mnemonicParsing="false" selected="true" text="Office" toggleGroup="$appointmentType" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <RadioButton fx:id="doctorOfficeRadio" mnemonicParsing="false" text="Office" toggleGroup="$appointmentType" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>
                      </children>
