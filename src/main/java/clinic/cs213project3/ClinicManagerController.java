@@ -12,7 +12,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 /**
- * The controller class for managing what is displayed on the JavaFX UI.
+ * The controller class for managing events in the JavaFX UI.
  * @author Aarush Desai
  */
 public class ClinicManagerController {
@@ -30,7 +30,7 @@ public class ClinicManagerController {
     private CircularLinkedList technicians;
 
     @FXML
-    private TextField logger;
+    private TextArea logger;
     @FXML
     private ChoiceBox<String> timeslotBoxSchedule;
     @FXML
@@ -71,10 +71,33 @@ public class ClinicManagerController {
     private RadioButton doctorOfficeRadio;
     @FXML
     private RadioButton imagingRoomRadio;
+    @FXML
+    private RadioButton billingRadio;
+    @FXML
+    private RadioButton creditRadio;
+    @FXML
+    private RadioButton allAppointmentsRadio;
+    @FXML
+    private RadioButton officeAppointmentsRadio;
+    @FXML
+    private RadioButton imagingAppointmentsRadio;
+    @FXML
+    private RadioButton dateOrderRadio;
+    @FXML
+    private RadioButton patientOrderRadio;
+    @FXML
+    private RadioButton locationOrderRadio;
 
-    // Initializes everything...
+    /**
+     * Method is run upon execution of the UI software.
+     * Method initializes backend variables, and enables event listeners.
+     */
     @FXML
     public void initialize() {
+        // Make error logger immutable...
+        logger.setDisable(true);
+        printLog(">>>>> WELCOME TO THE CLINIC MANAGER! <<<<<");
+        // Initialize instance variables...
         appointmentList = new List<Appointment>();
         medicalRecord = new List<Patient>();
         timeslots = new List<Timeslot>();
@@ -95,6 +118,10 @@ public class ClinicManagerController {
         technicians = new CircularLinkedList();
         File file = new File("providers.txt");
         readInProviders(file);
+        // Set up everything else...
+        Sort.sort(providersList);
+        print(providersList);
+        technicians.createTracker();
         // Fill timeslot boxes...
         String[] timeSlotStrings = new String[timeslots.size()];
         for (int i = 0 ; i < timeSlotStrings.length; i++) {
@@ -106,7 +133,7 @@ public class ClinicManagerController {
         newTimeslotBox.getItems().addAll(timeSlotStrings);
         // Fill in doctor box...
         String[] doctorStrings = new String[doctorsList.size()];
-        for (int i = 0 ; i < doctorStrings.length; i++) {
+        for (int i = 0; i < doctorStrings.length; i++) {
             doctorStrings[i] = doctorsList.get(i).toString();
         }
         doctorsBox.getItems().addAll(doctorStrings);
@@ -117,14 +144,11 @@ public class ClinicManagerController {
             roomStrings[i] = rooms[i].toString();
         }
         techniciansBox.getItems().addAll(roomStrings);
-        // Set up everything else...
-        Sort.sort(providersList);
-        technicians.createTracker();
         // Create listener for Doctor & Technician Buttons...
         doctorsBox.setDisable(true);
         techniciansBox.setDisable(true);
-        ToggleGroup toggleGroup = doctorOfficeRadio.getToggleGroup();
-        toggleGroup.selectedToggleProperty().addListener((_, _, _) -> {
+        ToggleGroup scheduleToggleGroup = doctorOfficeRadio.getToggleGroup();
+        scheduleToggleGroup.selectedToggleProperty().addListener((_, _, _) -> {
             if (doctorOfficeRadio.isSelected()) {
                 doctorsBox.setDisable(false);
                 techniciansBox.setDisable(true);
@@ -134,13 +158,49 @@ public class ClinicManagerController {
                 techniciansBox.setDisable(false);
             }
         });
+        // Create listener for Appointment Sorting Buttons...
+        ToggleGroup sortingToggleGroup = allAppointmentsRadio.getToggleGroup();
+        sortingToggleGroup.selectedToggleProperty().addListener((_, _, _) -> {
+            if (officeAppointmentsRadio.isSelected() || imagingAppointmentsRadio.isSelected()) {
+                // Deselect them all...
+                dateOrderRadio.setSelected(false);
+                patientOrderRadio.setSelected(false);
+                locationOrderRadio.setSelected(false);
+                // Disable them all...
+                dateOrderRadio.setDisable(true);
+                patientOrderRadio.setDisable(true);
+                locationOrderRadio.setDisable(true);
+            }
+            else {
+                dateOrderRadio.setDisable(false);
+                patientOrderRadio.setDisable(false);
+                locationOrderRadio.setDisable(false);
+            }
+        });
     }
-    // Schedules a new appointment...
+
+    /**
+     * Method clears the event logger/text area in the UI.
+     */
+    @FXML
+    private void clearEventLog() {
+        logger.clear();
+    }
+
+    /**
+     * Method schedules a new appointment in the clinic manager.
+     * Event is triggered upon pressing "Schedule Appointment" button.
+     */
     @FXML
     private void scheduleAppointment() {
         // Command...
-        String command = "D";
-        if (imagingRoomRadio.isSelected()) { command = "T";}
+        String command;
+        if (doctorOfficeRadio.isSelected()) { command = "D";}
+        else if (imagingRoomRadio.isSelected()) { command = "T";}
+        else {
+            printLog("Please choose the type of appointment.");
+            return;
+        }
         // Date...
         LocalDate selectedDate = dateBoxSchedule.getValue();
         String dateStr = null;
@@ -150,15 +210,24 @@ public class ClinicManagerController {
             int day = selectedDate.getDayOfMonth();
             dateStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter a date for your appointment.");
+            return;
+        }
         // Timeslot Number...
         int slotNumber = timeslotBoxSchedule.getSelectionModel().getSelectedIndex() + 1;
         // First Name...
         String firstName = firstNameSchedule.getText();
-        if (firstName == null || firstName.isEmpty()) { return;}
+        if (firstName == null || firstName.isEmpty()) {
+            printLog("Please enter your first name.");
+            return;
+        }
         // Last Name...
         String lastName = lastNameSchedule.getText();
-        if (lastName == null || lastName.isEmpty()) { return;}
+        if (lastName == null || lastName.isEmpty()) {
+            printLog("Please enter your last name.");
+            return;
+        }
         // Date of Birth...
         LocalDate selectedDateOfBirth = dateOfBirthBoxSchedule.getValue();
         String dateOfBirthStr = null;
@@ -168,14 +237,20 @@ public class ClinicManagerController {
             int day = selectedDateOfBirth.getDayOfMonth();
             dateOfBirthStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter your date of birth.");
+            return;
+        }
         String fullCommand = command + "," + dateStr + "," + slotNumber + "," +
                 firstName + "," + lastName + "," + dateOfBirthStr + ",";
         // Get NPI or room...
         if (command.equals("D")) {
             // Get doctor's NPI number...
             String doctorString = doctorsBox.getValue();
-            if (doctorString == null) { return;}
+            if (doctorString == null) {
+                printLog("Please choose a doctor's office.");
+                return;
+            }
             String npiString = doctorString.replace("]","");
             npiString = npiString.substring(npiString.length() - NPI_INDEX);
             fullCommand = fullCommand + npiString;
@@ -184,18 +259,22 @@ public class ClinicManagerController {
             // Get the imaging room...
             String roomString = techniciansBox.getValue();
             if (roomString == null) {
+                printLog("Please choose an imaging room.");
                 return;
             }
             roomString = roomString.toLowerCase();
             fullCommand = fullCommand + roomString;
         }
-        System.out.println(fullCommand);
         // Run the command...
         StringTokenizer tokenizer = new StringTokenizer(fullCommand, ",");
         command = tokenizer.nextToken();
         runCommand(command, tokenizer);
     }
-    // Cancels an appointment...
+
+    /**
+     * Method cancels an existing appointment in the clinic manager.
+     * Event is triggered upon pressing "Cancel Appointment" button.
+     */
     @FXML
     private void cancelAppointment() {
         // Command...
@@ -209,15 +288,24 @@ public class ClinicManagerController {
             int day = selectedDate.getDayOfMonth();
             dateStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter the date of your appointment.");
+            return;
+        }
         // Timeslot Number...
         int slotNumber = timeslotBoxCancel.getSelectionModel().getSelectedIndex() + 1;
         // First Name...
         String firstName = firstNameCancel.getText();
-        if (firstName == null || firstName.isEmpty()) { return;}
+        if (firstName == null || firstName.isEmpty()) {
+            printLog("Please enter your first name.");
+            return;
+        }
         // Last Name...
         String lastName = lastNameCancel.getText();
-        if (lastName == null || lastName.isEmpty()) { return;}
+        if (lastName == null || lastName.isEmpty()) {
+            printLog("Please enter your last name.");
+            return;
+        }
         // Date of Birth...
         LocalDate selectedDateOfBirth = dateOfBirthBoxCancel.getValue();
         String dateOfBirthStr = null;
@@ -227,16 +315,22 @@ public class ClinicManagerController {
             int day = selectedDateOfBirth.getDayOfMonth();
             dateOfBirthStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter your date of birth.");
+            return;
+        }
         String fullCommand = command + "," + dateStr + "," + slotNumber + "," +
                 firstName + "," + lastName + "," + dateOfBirthStr;
-        System.out.println(fullCommand);
         // Run the command...
         StringTokenizer tokenizer = new StringTokenizer(fullCommand, ",");
         command = tokenizer.nextToken();
         runCommand(command, tokenizer);
     }
-    // Reschedules an appointment...
+
+    /**
+     * Method reschedules an existing appointment in the clinic manager.
+     * Event is triggered upon pressing "Reschedule Appointment" button.
+     */
     @FXML
     private void rescheduleAppointment() {
         // Command...
@@ -250,15 +344,24 @@ public class ClinicManagerController {
             int day = selectedDate.getDayOfMonth();
             dateStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter the date of your appointment.");
+            return;
+        }
         // Old Timeslot Number...
         int oldSlotNumber = oldTimeslotBox.getSelectionModel().getSelectedIndex() + 1;
         // First Name...
         String firstName = firstNameReschedule.getText();
-        if (firstName == null || firstName.isEmpty()) { return;}
+        if (firstName == null || firstName.isEmpty()) {
+            printLog("Please enter your first name.");
+            return;
+        }
         // Last Name...
         String lastName = lastNameReschedule.getText();
-        if (lastName == null || lastName.isEmpty()) { return;}
+        if (lastName == null || lastName.isEmpty()) {
+            printLog("Please enter your last name.");
+            return;
+        }
         // Date of Birth...
         LocalDate selectedDateOfBirth = dateOfBirthBoxReschedule.getValue();
         String dateOfBirthStr = null;
@@ -268,17 +371,92 @@ public class ClinicManagerController {
             int day = selectedDateOfBirth.getDayOfMonth();
             dateOfBirthStr = month + "/" + day + "/" + year;
         }
-        else { return;}
+        else {
+            printLog("Please enter your date of birth.");
+            return;
+        }
         // New Timeslot Number...
         int newSlotNumber = newTimeslotBox.getSelectionModel().getSelectedIndex() + 1;
         // Run command...
         String fullCommand = command + "," + dateStr + "," + oldSlotNumber + "," +
                 firstName + "," + lastName + "," + dateOfBirthStr + "," + newSlotNumber;
-        System.out.println(fullCommand);
         // Run the command...
         StringTokenizer tokenizer = new StringTokenizer(fullCommand, ",");
         command = tokenizer.nextToken();
         runCommand(command, tokenizer);
+    }
+
+    /**
+     * Method displays dispersed funds for patients and providers.
+     * User can choose to display patient bills or provider credits.
+     */
+    @FXML
+    private void displayFunds() {
+        String command = null;
+        if (billingRadio.isSelected()) {
+            command = "PS";
+            // Write helper method to create the tokenizer...
+            StringTokenizer tokenizer = new StringTokenizer(command, ",");
+            command = tokenizer.nextToken();
+            runCommand(command, tokenizer);
+        }
+        else if (creditRadio.isSelected()) {
+            command = "PC";
+            StringTokenizer tokenizer = new StringTokenizer(command, ",");
+            command = tokenizer.nextToken();
+            runCommand(command, tokenizer);
+        }
+        else {
+            printLog("Please choose funds to disperse.");
+        }
+    }
+
+    /**
+     * Method displays existing appointments in a specified sorting order.
+     * User can choose to sort all appointments by date, patient, or location.
+     * User can choose to display only office or imaging appointments sorted by location.
+     */
+    @FXML
+    private void displayAppointments() {
+        String command = null;
+        if (officeAppointmentsRadio.isSelected()) {
+            command = "PO";
+            StringTokenizer tokenizer = new StringTokenizer(command, ",");
+            command = tokenizer.nextToken();
+            runCommand(command, tokenizer);
+        }
+        else if (imagingAppointmentsRadio.isSelected()) {
+            command = "PI";
+            StringTokenizer tokenizer = new StringTokenizer(command, ",");
+            command = tokenizer.nextToken();
+            runCommand(command, tokenizer);
+        }
+        else if (allAppointmentsRadio.isSelected()) {
+            if (dateOrderRadio.isSelected()) {
+                command = "PA";
+                StringTokenizer tokenizer = new StringTokenizer(command, ",");
+                command = tokenizer.nextToken();
+                runCommand(command, tokenizer);
+            }
+            else if (patientOrderRadio.isSelected()) {
+                command = "PP";
+                StringTokenizer tokenizer = new StringTokenizer(command, ",");
+                command = tokenizer.nextToken();
+                runCommand(command, tokenizer);
+            }
+            else if (locationOrderRadio.isSelected()) {
+                command = "PL";
+                StringTokenizer tokenizer = new StringTokenizer(command, ",");
+                command = tokenizer.nextToken();
+                runCommand(command, tokenizer);
+            }
+            else {
+                printLog("Please choose a sorting order.");
+            }
+        }
+        else {
+            printLog("Please choose appointments to display.");
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -290,6 +468,7 @@ public class ClinicManagerController {
      * @param dateStr The date in "MM/DD/YYYY" format.
      * @return The Date object or null if string is invalid.
      */
+    @FXML
     private Date parseDate(String dateStr) {
         try {
             // Date has three integer parts...
@@ -309,6 +488,7 @@ public class ClinicManagerController {
      * @param timeslotStr The timeslot number as a string.
      * @return The Timeslot object or null if string is invalid.
      */
+    @FXML
     private Timeslot parseTimeslot(String timeslotStr) {
         try {
             int slotNumber = Integer.parseInt(timeslotStr);
@@ -324,6 +504,7 @@ public class ClinicManagerController {
      * @param roomStr The imaging room as a string.
      * @return The Radiology object or null if string is invalid.
      */
+    @FXML
     private Radiology parseRadiology(String roomStr) {
         try {
             String roomName = roomStr.toUpperCase();
@@ -339,6 +520,7 @@ public class ClinicManagerController {
      * @param npi The doctor's npi.
      * @return The Doctor object with the npi or null if npi does not exist.
      */
+    @FXML
     private Doctor parseDoctor(String npi) {
         for (Provider provider: providersList) {
             if (provider instanceof Doctor) {
@@ -357,6 +539,7 @@ public class ClinicManagerController {
      * @param apt The appointment we are searching for.
      * @return The appointment's provider as a Person object, else null if appointment does not exist.
      */
+    @FXML
     private Person findProvider(Appointment apt) {
         int index = appointmentList.indexOf(apt);
         if (index != NOT_FOUND) {
@@ -374,6 +557,7 @@ public class ClinicManagerController {
      * @param apt The appointment we want to schedule.
      * @return True if no appointment in list has same provider, timeslot, and date, else False.
      */
+    @FXML
     private boolean isProviderAvailable(Appointment apt) {
         for (int i = 0; i < appointmentList.size(); i++) {
             Appointment currentApt = appointmentList.get(i);
@@ -390,6 +574,7 @@ public class ClinicManagerController {
      * All patients associated with appointments in the list are added to the medical record.
      * Method only runs when PS command is entered.
      */
+    @FXML
     private void appendMedicalRecords() {
         // First sort appointments by patient...
         Sort.sort(appointmentList, "patient");
@@ -421,29 +606,30 @@ public class ClinicManagerController {
      * @param timeslotStr The timeslot as a string.
      * @return True if the date and timeslot can be used, else False.
      */
+    @FXML
     private boolean isDateAndTimeValid(Date date, String dateStr, Timeslot timeslot, String timeslotStr) {
         if (date == null || !date.isValid()) {
-            System.out.println("Appointment date: " + dateStr +
+            printLog("Appointment date: " + dateStr +
                     " is not a valid calendar date ");
             return false;
         }
         else if (date.isTodayOrBefore()) {
-            System.out.println("Appointment date: " + dateStr +
+            printLog("Appointment date: " + dateStr +
                     " is today or a date before today.");
             return false;
         }
         else if (date.isWeekend()) {
-            System.out.println("Appointment date: " + dateStr +
+            printLog("Appointment date: " + dateStr +
                     " is Saturday or Sunday.");
             return false;
         }
         else if (!date.isWithinSixMonths()) {
-            System.out.println("Appointment date: " + dateStr +
+            printLog("Appointment date: " + dateStr +
                     " is not within six months.");
             return false;
         }
         else if (timeslot == null) {
-            System.out.println(timeslotStr + " is not a valid time slot.");
+            printLog(timeslotStr + " is not a valid time slot.");
             return false;
         }
         return true;
@@ -456,14 +642,15 @@ public class ClinicManagerController {
      * @param dobStr The date of birth as a string.
      * @return True if the date of birth is logically valid, else False.
      */
+    @FXML
     private boolean isBirthdayValid(Date dob, String dobStr) {
         if (dob == null || !dob.isValid()) {
-            System.out.println("Patient dob: " + dobStr +
+            printLog("Patient dob: " + dobStr +
                     " is not a valid calendar date ");
             return false;
         }
         else if (dob.isTodayOrAfter()) {
-            System.out.println("Patient dob: " + dobStr +
+            printLog("Patient dob: " + dobStr +
                     " is today or a date after today.");
             return false;
         }
@@ -476,9 +663,10 @@ public class ClinicManagerController {
      * @param profile The patient's profile.
      * @return True if the patient's appointment does not exist in list, else False.
      */
+    @FXML
     private boolean canAppointmentBeScheduled(Appointment apt, Profile profile) {
         if (appointmentList.contains(apt)) {
-            System.out.println(profile.toString() +
+            printLog(profile.toString() +
                     " has an existing appointment at the same time slot.");
             return false;
         }
@@ -493,15 +681,16 @@ public class ClinicManagerController {
      * @param timeslotStr The appointment's timeslot as a string.
      * @return True if doctor exists and is available at the appointment's timeslot, else False.
      */
+    @FXML
     private boolean isDoctorValid(Appointment apt, Doctor doctor, String npi, String timeslotStr) {
         // Check if doctor exists...
         if (doctor == null) {
-            System.out.println(npi + " - " +
+            printLog(npi + " - " +
                     "provider doesn't exist.");
             return false;
         }
         else if (!isProviderAvailable(apt)) {
-            System.out.println(doctor.toString() + " " +
+            printLog(doctor.toString() + " " +
                     "is not available at slot " + timeslotStr);
             return false;
         }
@@ -514,6 +703,7 @@ public class ClinicManagerController {
      * Any technicians are also appended to the front of the circular linked list.
      * @param file The file object to read from.
      */
+    @FXML
     private void readInProviders(File file) {
         try {
             Scanner providerScanner = new Scanner(file);
@@ -528,14 +718,14 @@ public class ClinicManagerController {
                     addDoctors(providerTokens);
                 }
                 else {
-                    System.out.println("Not a provider.");
+                    printLog("Not a provider.");
                 }
             }
-            System.out.println();
+            printLog("\n");
             providerScanner.close();
         }
         catch (FileNotFoundException e) {
-            System.out.println("File not found.");
+            printLog("File not found.");
         }
     }
 
@@ -543,6 +733,7 @@ public class ClinicManagerController {
      * Helper method appends a doctor to the list of providers.
      * @param tokens The tokenizer used to append doctor.
      */
+    @FXML
     private void addDoctors(StringTokenizer tokens) {
         String firstName = tokens.nextToken();
         String lastName = tokens.nextToken();
@@ -565,6 +756,7 @@ public class ClinicManagerController {
      * Method also appends technician to the circular linked list.
      * @param tokens The tokenizer used to append technician.
      */
+    @FXML
     private void addTechnicians(StringTokenizer tokens) {
         String firstName = tokens.nextToken();
         String lastName = tokens.nextToken();
@@ -587,6 +779,7 @@ public class ClinicManagerController {
      * @param provider The provider we compute the credit for.
      * @return The total credit earned by the provider as an integer.
      */
+    @FXML
     private int computeProviderCredit(Provider provider) {
         int credit = 0;
         for (Appointment apt: appointmentList) {
@@ -601,10 +794,11 @@ public class ClinicManagerController {
      * Schedules a new appointment with a doctor to the clinic's list.
      * @param tokenizer The command line data tokens.
      */
+    @FXML
     private void dCommand(StringTokenizer tokenizer) {
         int numTokens = tokenizer.countTokens() + 1;
         if (numTokens != NUM_TOKENS) {
-            System.out.println("Missing data tokens.");
+            printLog("Missing data tokens.");
             return;
         }
         // Gather command line tokens...
@@ -630,17 +824,18 @@ public class ClinicManagerController {
             return;
         }
         appointmentList.add(apt);
-        System.out.println(apt.toString() + " booked.");
+        printLog(apt.toString() + " booked.");
     }
 
     /**
      * Schedules a new appointment with a technician to the clinic's list.
      * @param tokenizer The command line data tokens.
      */
+    @FXML
     private void tCommand(StringTokenizer tokenizer) {
         int numTokens = tokenizer.countTokens() + 1;
         if (numTokens != NUM_TOKENS) {
-            System.out.println("Missing data tokens.");
+            printLog("Missing data tokens.");
             return;
         }
         String dateStr = tokenizer.nextToken();
@@ -663,28 +858,29 @@ public class ClinicManagerController {
             return;
         }
         if (room == null) {
-            System.out.println(roomStr + " - imaging service not provided.");
+            printLog(roomStr + " - imaging service not provided.");
             return;
         }
         Technician technician = technicians.findTechnician(appointmentList, room, timeslot, date);
         if (technician == null) {
-            System.out.println("Cannot find an available technician at all locations for " +
+            printLog("Cannot find an available technician at all locations for " +
                     room.name() + " at slot " + timeslotStr + ".");
             return;
         }
         apt.setProvider(technician);
         appointmentList.add(apt);
-        System.out.println(apt.toString() + " booked.");
+        printLog(apt.toString() + " booked.");
     }
 
     /**
      * Cancels/deletes an existing appointment from the clinic's list.
      * @param tokenizer The command line data tokens.
      */
+    @FXML
     private void cCommand(StringTokenizer tokenizer) {
         int numTokens = tokenizer.countTokens() + 1;
         if (numTokens != NUM_C_TOKENS) {
-            System.out.println("Missing data tokens.");
+            printLog("Missing data tokens.");
             return;
         }
         String dateStr = tokenizer.nextToken();
@@ -705,11 +901,11 @@ public class ClinicManagerController {
         }
         if (appointmentList.contains(apt)) {
             appointmentList.remove(apt);
-            System.out.println(date.toString() + " " + timeslot.toString() +
+            printLog(date.toString() + " " + timeslot.toString() +
                     " " + profile.toString() + " - appointment has been canceled.");
         }
         else {
-            System.out.println(date.toString() + " " + timeslot.toString() +
+            printLog(date.toString() + " " + timeslot.toString() +
                     " " + profile.toString() + " - appointment does not exist.");
         }
     }
@@ -719,6 +915,7 @@ public class ClinicManagerController {
      * Clinic does not allow imaging appointments to be rescheduled.
      * @param tokenizer The command line data tokens.
      */
+    @FXML
     private void rCommand(StringTokenizer tokenizer) {
         try {
             String dateStr = tokenizer.nextToken();
@@ -736,106 +933,111 @@ public class ClinicManagerController {
             Provider provider = (Provider) findProvider(oldAppointment);
             Appointment newAppointment = new Appointment(date, newTimeslot, patient, provider);
             if (provider == null) { // Appointment does not exist...
-                System.out.println(date.toString() + " " + oldTimeslot.toString() +
+                printLog(date.toString() + " " + oldTimeslot.toString() +
                         " " + profile.toString() + " does not exist.");
                 return;
             } else if (newTimeslot == null) { // Checks if new timeslot valid...
-                System.out.println(newTimeslotStr + " is not a valid time slot.");
+                printLog(newTimeslotStr + " is not a valid time slot.");
                 return;
             } else if (appointmentList.contains(newAppointment)) {
-                System.out.println(profile.toString() + " has an existing appointment at " +
+                printLog(profile.toString() + " has an existing appointment at " +
                         date.toString() + " " + newTimeslot.toString());
                 return;
             } else if (!isProviderAvailable(newAppointment)) {
-                System.out.println(provider.toString() + " is not available at slot " + newTimeslotStr);
+                printLog(provider.toString() + " is not available at slot " + newTimeslotStr);
                 return;
             }
             appointmentList.remove(oldAppointment);
             appointmentList.add(newAppointment);
-            System.out.println("Rescheduled to " + newAppointment.toString());
+            printLog("Rescheduled to " + newAppointment.toString());
         }
         catch (Exception e) {
-            System.out.println("Missing data tokens.");
+            printLog("Missing data tokens.");
         }
     }
 
     /**
      * Displays all existing appointments sorted by date, time, and provider's name.
      */
+    @FXML
     private void paCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
-        System.out.println("** List of appointments, ordered by date/time/provider.");
+        printLog("** List of appointments, ordered by date/time/provider.");
         Sort.sort(appointmentList, "appointment");
         print(appointmentList);
-        System.out.println("** end of list **");
+        printLog("** end of list **");
     }
 
     /**
      * Displays all existing appointments sorted by the patient's profile, date, and timeslots.
      */
+    @FXML
     private void ppCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
-        System.out.println("** List of appointments, ordered by patient/date/time.");
+        printLog("** List of appointments, ordered by patient/date/time.");
         Sort.sort(appointmentList, "patient");
         print(appointmentList);
-        System.out.println("** end of list **");
+        printLog("** end of list **");
     }
 
     /**
      * Displays all existing appointments sorted by county, date, and timeslot.
      */
+    @FXML
     private void plCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
-        System.out.println("** List of appointments, ordered by county/date/time.");
+        printLog("** List of appointments, ordered by county/date/time.");
         Sort.sort(appointmentList, "location");
         print(appointmentList);
-        System.out.println("** end of list **");
+        printLog("** end of list **");
     }
 
     /**
      * Displays all existing office appointments sorted by county, date, and timeslot.
      */
+    @FXML
     private void poCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
         Sort.sort(appointmentList, "location");
-        System.out.println("** List of office appointments ordered by county/date/time.");
+        printLog("** List of office appointments ordered by county/date/time.");
         for (Appointment apt : appointmentList) {
             if (!(apt instanceof Imaging)) {
-                System.out.println(apt);
+                printLog(apt.toString());
             }
         }
-        System.out.println("** end of list **");
+        printLog("** end of list **");
     }
 
     /**
      * Displays all existing radiology appointments sorted by county, date, and timeslot.
      */
+    @FXML
     private void piCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
         Sort.sort(appointmentList, "location");
-        System.out.println("** List of radiology appointments ordered by county/date/time.");
+        printLog("** List of radiology appointments ordered by county/date/time.");
         for (Appointment apt : appointmentList) {
             if (apt instanceof Imaging) {
                 Imaging imagingApt = (Imaging) apt;
-                System.out.println(imagingApt);
+                printLog(imagingApt.toString());
             }
         }
-        System.out.println("** end of list **");
+        printLog("** end of list **");
 
     }
 
@@ -844,19 +1046,20 @@ public class ClinicManagerController {
      * Computes bill based on number of completed visits for the patient.
      * Method clears out the appointment list once bills are computed and displayed.
      */
+    @FXML
     private void psCommand() {
         appendMedicalRecords();
         if (medicalRecord.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
-        System.out.println("** Billing statement ordered by patient. **");
+        printLog("** Billing statement ordered by patient. **");
         for (int i = 0; i < medicalRecord.size(); i++) {
             int patientNum = i + 1;
             String patientInfo = medicalRecord.get(i).billingInfo();
-            System.out.println("(" + patientNum + ")" + " " + patientInfo);
+            printLog("(" + patientNum + ")" + " " + patientInfo);
         }
-        System.out.println("** end of list **");
+        printLog("** end of list **");
         // Empty the list once command finishes...
         appointmentList = new List<Appointment>();
     }
@@ -866,14 +1069,15 @@ public class ClinicManagerController {
      * Computes credit based on the provider's set of completed visits with patients.
      * Method does not clear out the appointment list once credits are computed.
      */
+    @FXML
     private void pcCommand() {
         if (appointmentList.isEmpty()) {
-            System.out.println("Schedule calendar is empty.");
+            printLog("Schedule calendar is empty.");
             return;
         }
         // Sort providers by profile...
         Sort.sort(providersList);
-        System.out.println("** Credit amount ordered by provider. **");
+        printLog("** Credit amount ordered by provider. **");
         for (int i = 0; i < providersList.size(); i++) {
             int providerNum = i + 1;
             Provider provider = providersList.get(i);
@@ -884,11 +1088,11 @@ public class ClinicManagerController {
             String lname = provider.getProfile().getLastName();
             String dob = provider.getProfile().getDob().toString();
             String providerInfo = fname + " " + lname + " " + dob;
-            System.out.println("(" + providerNum + ") " +
+            printLog("(" + providerNum + ") " +
                     providerInfo + " [credit amount: $" +
                     creditStr + "]");
         }
-        System.out.println("** end of list **");
+        printLog("** end of list **");
     }
 
     /**
@@ -898,6 +1102,7 @@ public class ClinicManagerController {
      * @param command The command as a string.
      * @param tokenizer The command's data tokens.
      */
+    @FXML
     private void runScheduleCommands(String command, StringTokenizer tokenizer) {
         switch (command) {
             case "D":
@@ -913,7 +1118,7 @@ public class ClinicManagerController {
                 rCommand(tokenizer);
                 break;
             default:
-                System.out.println("Invalid command!");
+                printLog("Invalid command!");
         }
     }
 
@@ -923,6 +1128,7 @@ public class ClinicManagerController {
      * The method prints "Invalid command!" for any invalid commands.
      * @param command The command as a string.
      */
+    @FXML
     private void runSortingCommands(String command) {
         switch (command) {
             case "PA":
@@ -941,7 +1147,7 @@ public class ClinicManagerController {
                 piCommand();
                 break;
             default:
-                System.out.println("Invalid command!");
+                printLog("Invalid command!");
         }
     }
 
@@ -951,6 +1157,7 @@ public class ClinicManagerController {
      * The method prints "Invalid command!" for any invalid commands.
      * @param command The command as a string.
      */
+    @FXML
     private void runBillingCommands(String command) {
         switch (command) {
             case "PS":
@@ -960,7 +1167,7 @@ public class ClinicManagerController {
                 pcCommand();
                 break;
             default:
-                System.out.println("Invalid command!");
+                printLog("Invalid command!");
         }
     }
 
@@ -970,6 +1177,7 @@ public class ClinicManagerController {
      * @param command The command as a string.
      * @param tokenizer The command's data tokens.
      */
+    @FXML
     private void runCommand(String command, StringTokenizer tokenizer) {
         // Running scheduling commands...
         if (command.equals("D") || command.equals("T") ||
@@ -986,7 +1194,7 @@ public class ClinicManagerController {
             runBillingCommands(command);
         }
         else {
-            System.out.println("Invalid command!");
+            printLog("Invalid command!");
         }
     }
 
@@ -994,10 +1202,20 @@ public class ClinicManagerController {
      * Prints all elements of the list in a column.
      * @param list The generic list.
      */
+    @FXML
     private void print(List list) {
         for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
+            printLog(list.get(i).toString());
         }
+    }
+
+    /**
+     * Prints text to the UI text area for logging events.
+     * @param text The text to print.
+     */
+    @FXML
+    private void printLog(String text) {
+       logger.appendText(text + "\n");
     }
 
 }

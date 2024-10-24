@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<VBox alignment="CENTER" prefHeight="552.0" prefWidth="451.0" spacing="20.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="clinic.cs213project3.ClinicManagerController">
+<VBox alignment="CENTER" prefHeight="818.0" prefWidth="451.0" spacing="20.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="clinic.cs213project3.ClinicManagerController">
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
@@ -262,9 +262,12 @@
                            </rowConstraints>
                            <children>
                               <Text layoutX="10.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Funds to Disperse" />
-                              <RadioButton mnemonicParsing="false" text="Patient Billing" GridPane.columnIndex="1" />
-                              <RadioButton mnemonicParsing="false" text="Provider Credit" GridPane.columnIndex="2" />
-                              <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="110.0" text="Disperse Funds" GridPane.rowIndex="2" />
+                              <RadioButton fx:id="billingRadio" mnemonicParsing="false" text="Patient Billing" GridPane.columnIndex="1">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="fundsToShow" />
+                                 </toggleGroup></RadioButton>
+                              <RadioButton fx:id="creditRadio" mnemonicParsing="false" text="Provider Credit" toggleGroup="$fundsToShow" GridPane.columnIndex="2" />
+                              <Button mnemonicParsing="false" onAction="#displayFunds" prefHeight="26.0" prefWidth="110.0" text="Disperse Funds" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
                         <TableView layoutY="84.0" prefHeight="248.0" prefWidth="411.0">
@@ -295,15 +298,21 @@
                               <RowConstraints maxHeight="34.59998168945313" minHeight="10.0" prefHeight="31.400000000000006" vgrow="SOMETIMES" />
                            </rowConstraints>
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="176.0" text="Print Appointments" GridPane.rowIndex="3" />
+                              <Button mnemonicParsing="false" onAction="#displayAppointments" prefHeight="26.0" prefWidth="176.0" text="Print Appointments" GridPane.rowIndex="3" />
                               <Text layoutX="10.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Appointment Types" />
-                              <RadioButton mnemonicParsing="false" text="All" GridPane.columnIndex="1" />
-                              <RadioButton mnemonicParsing="false" text="Office" GridPane.columnIndex="2" />
-                              <RadioButton mnemonicParsing="false" text="Imaging" GridPane.columnIndex="3" />
+                              <RadioButton fx:id="allAppointmentsRadio" mnemonicParsing="false" text="All" GridPane.columnIndex="1">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="appointmentsToPrint" />
+                                 </toggleGroup></RadioButton>
+                              <RadioButton fx:id="officeAppointmentsRadio" mnemonicParsing="false" text="Office" toggleGroup="$appointmentsToPrint" GridPane.columnIndex="2" />
+                              <RadioButton fx:id="imagingAppointmentsRadio" mnemonicParsing="false" text="Imaging" toggleGroup="$appointmentsToPrint" GridPane.columnIndex="3" />
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Sorting Order" GridPane.rowIndex="1" />
-                              <RadioButton mnemonicParsing="false" text="Date" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <RadioButton layoutX="215.0" layoutY="13.0" mnemonicParsing="false" text="Patient" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                              <RadioButton layoutX="215.0" layoutY="36.0" mnemonicParsing="false" text="Location" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                              <RadioButton fx:id="dateOrderRadio" mnemonicParsing="false" text="Date" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="sortOrder" />
+                                 </toggleGroup></RadioButton>
+                              <RadioButton fx:id="patientOrderRadio" layoutX="215.0" layoutY="13.0" mnemonicParsing="false" text="Patient" toggleGroup="$sortOrder" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <RadioButton fx:id="locationOrderRadio" layoutX="215.0" layoutY="36.0" mnemonicParsing="false" text="Location" toggleGroup="$sortOrder" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                         <TableView layoutY="97.0" prefHeight="235.0" prefWidth="411.0">
@@ -311,9 +320,9 @@
                               <TableColumn prefWidth="45.60003471374512" text="Date" />
                               <TableColumn prefWidth="80.00006866455078" text="Timeslot" />
                               <TableColumn prefWidth="63.99993896484375" text="Patient" />
-                              <TableColumn prefWidth="90.4000244140625" text="Location" />
-                              <TableColumn prefWidth="63.20001220703125" text="Room" />
-                              <TableColumn prefWidth="64.00001831054686" text="Rate" />
+                              <TableColumn prefWidth="84.79998779296875" text="Location" />
+                              <TableColumn prefWidth="65.5999755859375" text="Room" />
+                              <TableColumn minWidth="0.0" prefWidth="71.199951171875" text="Rate" />
                            </columns>
                         </TableView>
                      </children>
@@ -324,34 +333,33 @@
                <content>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0">
                      <children>
-                        <GridPane layoutX="7.0" layoutY="14.0" prefHeight="318.0" prefWidth="397.0">
-                           <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                           </columnConstraints>
-                           <rowConstraints>
-                              <RowConstraints maxHeight="151.4" minHeight="10.0" prefHeight="20.999990844726568" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="297.8000091552734" minHeight="10.0" prefHeight="297.8000091552734" vgrow="SOMETIMES" />
-                           </rowConstraints>
-                           <children>
-                              <Button mnemonicParsing="false" text="Load Providers" />
-                              <TableView prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                 <columns>
-                                    <TableColumn prefWidth="75.0" text="Name" />
-                                    <TableColumn prefWidth="75.0" text="Type" />
-                                    <TableColumn prefWidth="78.39996337890625" text="Location" />
-                                    <TableColumn prefWidth="87.2000732421875" text="Specialty" />
-                                    <TableColumn prefWidth="80.800048828125" text="Rate" />
-                                 </columns>
-                              </TableView>
-                           </children>
-                        </GridPane>
+                        <TableView layoutY="14.0" prefHeight="318.0" prefWidth="411.0">
+                           <columns>
+                              <TableColumn prefWidth="73.59997367858887" text="Name" />
+                              <TableColumn prefWidth="76.79999542236328" text="Type" />
+                              <TableColumn prefWidth="82.4000244140625" text="Location" />
+                              <TableColumn prefWidth="94.4000244140625" text="Specialty" />
+                              <TableColumn prefWidth="80.79998779296875" text="Rate" />
+                           </columns>
+                        </TableView>
                      </children>
                   </AnchorPane>
                </content>
             </Tab>
          </tabs>
       </TabPane>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Clinic Logger" wrappingWidth="398.71563720703125" />
-      <TextArea prefHeight="132.0" prefWidth="411.0" />
+      <GridPane prefHeight="0.0" prefWidth="209.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="198.0" minWidth="10.0" prefWidth="78.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="334.0" minWidth="10.0" prefWidth="334.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Button mnemonicParsing="false" onAction="#clearEventLog" prefHeight="26.0" prefWidth="102.0" text="Clear Logs" />
+         </children>
+      </GridPane>
+      <TextArea fx:id="logger" prefHeight="304.0" prefWidth="411.0" />
    </children>
 </VBox>
