@@ -140,29 +140,6 @@ public class CircularLinkedList {
     }
 
     /**
-     * Prints the circular linked list on a single line.
-     * Elements are separated by arrows, indicating where they point to.
-     */
-    public void printChain() {
-        if (isEmpty()) {
-            return;
-        }
-        Node PTR = last.next;
-        do {
-            String fname = PTR.item.getProfile().getFirstName();
-            String lname = PTR.item.getProfile().getLastName();
-            String county = PTR.item.getLocation().name();
-            System.out.print(fname + " " + lname + " (" + county + ")");
-            if (PTR.next != last.next) {
-                System.out.print(" --> ");
-            }
-            PTR = PTR.next;
-        }
-        while (PTR != last.next);
-        System.out.println();
-    }
-
-    /**
      * Initializes the tracker pointing to the front of the list.
      * This tracker is used to assign technicians to new appointments.
      */
