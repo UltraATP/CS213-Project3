@@ -30,7 +30,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -154,8 +153,12 @@ public class ClinicManagerController {
     @FXML
     private void scheduleAppointment() {
         String command;
-        if (doctorOfficeRadio.isSelected()) { command = "D";}
-        else if (imagingRoomRadio.isSelected()) { command = "T";}
+        if (doctorOfficeRadio.isSelected()) {
+            command = "D";
+        }
+        else if (imagingRoomRadio.isSelected()) {
+            command = "T";
+        }
         else {
             printLog("Please choose the type of appointment.");
             return;
@@ -263,7 +266,7 @@ public class ClinicManagerController {
      */
     @FXML
     private void displayFunds() {
-        String command = null;
+        String command;
         if (billingRadio.isSelected()) {
             command = "PS";
             runStringCommand(command);
@@ -284,7 +287,7 @@ public class ClinicManagerController {
      */
     @FXML
     private void displayAppointments() {
-        String command = null;
+        String command;
         if (officeAppointmentsRadio.isSelected()) {
             command = "PO";
             runStringCommand(command);
@@ -324,9 +327,9 @@ public class ClinicManagerController {
         logger.setDisable(true);
         printLog(">>>>> WELCOME TO THE CLINIC MANAGER! <<<<<");
         // Initialize instance variables...
-        appointmentList = new List<Appointment>();
-        medicalRecord = new List<Patient>();
-        timeslots = new List<Timeslot>();
+        appointmentList = new List<>();
+        medicalRecord = new List<>();
+        timeslots = new List<>();
         timeslots.add(new Timeslot(9,0));
         timeslots.add(new Timeslot(9,30));
         timeslots.add(new Timeslot(10,0));
@@ -339,14 +342,13 @@ public class ClinicManagerController {
         timeslots.add(new Timeslot(15,30));
         timeslots.add(new Timeslot(16,0));
         timeslots.add(new Timeslot(16,30));
-        providersList = new List<Provider>();
-        doctorsList = new List<Doctor>();
+        providersList = new List<>();
+        doctorsList = new List<>();
         technicians = new CircularLinkedList();
         File file = new File("providers.txt");
         readInProviders(file);
         // Set up everything else...
         Sort.sort(providersList);
-        print(providersList);
         technicians.createTracker();
     }
 
@@ -508,7 +510,7 @@ public class ClinicManagerController {
                 String type = "DOCTOR";
                 String location = doctor.getLocation().toString();
                 String specialty = doctor.getSpecialty().toString();
-                String rate = "$" + String.valueOf(doctor.rate());
+                String rate = "$" + doctor.rate();
                 providerViews.add(new ProviderView(name, type, location, specialty, rate));
             }
             else {
@@ -517,7 +519,7 @@ public class ClinicManagerController {
                 String type = "TECHNICIAN";
                 String location = technician.getLocation().toString();
                 String specialty = "N/A";
-                String rate = "$" + String.valueOf(technician.rate());
+                String rate = "$" + technician.rate();
                 providerViews.add(new ProviderView(name, type, location, specialty, rate));
             }
         }
@@ -750,7 +752,7 @@ public class ClinicManagerController {
             return false;
         }
         else if (!isProviderAvailable(apt)) {
-            printLog(doctor.toString() + " " +
+            printLog(doctor + " " +
                     "is not available at slot " + timeslotStr);
             return false;
         }
@@ -806,8 +808,8 @@ public class ClinicManagerController {
         Profile profile = new Profile(firstName, lastName, date);
         Location location = Location.valueOf(locationStr.toUpperCase());
         Specialty specialty = Specialty.valueOf(specialtyStr);
-        Provider doctor = new Doctor(profile, location, specialty, npi);
-        doctorsList.add((Doctor) doctor);
+        Doctor doctor = new Doctor(profile, location, specialty, npi);
+        doctorsList.add(doctor);
         providersList.add(doctor);
     }
 
@@ -884,7 +886,7 @@ public class ClinicManagerController {
             return;
         }
         appointmentList.add(apt);
-        printLog(apt.toString() + " booked.");
+        printLog(apt + " booked.");
     }
 
     /**
@@ -929,7 +931,7 @@ public class ClinicManagerController {
         }
         apt.setProvider(technician);
         appointmentList.add(apt);
-        printLog(apt.toString() + " booked.");
+        printLog(apt + " booked.");
     }
 
     /**
@@ -961,12 +963,12 @@ public class ClinicManagerController {
         }
         if (appointmentList.contains(apt)) {
             appointmentList.remove(apt);
-            printLog(date.toString() + " " + timeslot.toString() +
-                    " " + profile.toString() + " - appointment has been canceled.");
+            printLog(date + " " + timeslot +
+                    " " + profile + " - appointment has been canceled.");
         }
         else {
-            printLog(date.toString() + " " + timeslot.toString() +
-                    " " + profile.toString() + " - appointment does not exist.");
+            printLog(date + " " + timeslot +
+                    " " + profile + " - appointment does not exist.");
         }
     }
 
@@ -993,23 +995,23 @@ public class ClinicManagerController {
             Provider provider = (Provider) findProvider(oldAppointment);
             Appointment newAppointment = new Appointment(date, newTimeslot, patient, provider);
             if (provider == null) { // Appointment does not exist...
-                printLog(date.toString() + " " + oldTimeslot.toString() +
-                        " " + profile.toString() + " does not exist.");
+                printLog(date + " " + oldTimeslot +
+                        " " + profile + " does not exist.");
                 return;
             } else if (newTimeslot == null) { // Checks if new timeslot valid...
                 printLog(newTimeslotStr + " is not a valid time slot.");
                 return;
             } else if (appointmentList.contains(newAppointment)) {
-                printLog(profile.toString() + " has an existing appointment at " +
-                        date.toString() + " " + newTimeslot.toString());
+                printLog(profile + " has an existing appointment at " +
+                        date + " " + newTimeslot);
                 return;
             } else if (!isProviderAvailable(newAppointment)) {
-                printLog(provider.toString() + " is not available at slot " + newTimeslotStr);
+                printLog(provider + " is not available at slot " + newTimeslotStr);
                 return;
             }
             appointmentList.remove(oldAppointment);
             appointmentList.add(newAppointment);
-            printLog("Rescheduled to " + newAppointment.toString());
+            printLog("Rescheduled to " + newAppointment);
         }
         catch (Exception e) {
             printLog("Missing data tokens.");
@@ -1026,11 +1028,8 @@ public class ClinicManagerController {
             printLog("Schedule calendar is empty.");
             return;
         }
-        printLog("** List of appointments, ordered by date/time/provider.");
         Sort.sort(appointmentList, "appointment");
         addAppointmentsToTableView();
-        print(appointmentList);
-        printLog("** end of list **");
     }
 
     /**
@@ -1043,11 +1042,8 @@ public class ClinicManagerController {
             printLog("Schedule calendar is empty.");
             return;
         }
-        printLog("** List of appointments, ordered by patient/date/time.");
         Sort.sort(appointmentList, "patient");
         addAppointmentsToTableView();
-        print(appointmentList);
-        printLog("** end of list **");
     }
 
     /**
@@ -1060,11 +1056,8 @@ public class ClinicManagerController {
             printLog("Schedule calendar is empty.");
             return;
         }
-        printLog("** List of appointments, ordered by county/date/time.");
         Sort.sort(appointmentList, "location");
         addAppointmentsToTableView();
-        print(appointmentList);
-        printLog("** end of list **");
     }
 
     /**
@@ -1079,14 +1072,11 @@ public class ClinicManagerController {
         }
         Sort.sort(appointmentList, "location");
         appointmentViews.clear();
-        printLog("** List of office appointments ordered by county/date/time.");
         for (Appointment apt : appointmentList) {
             if (!(apt instanceof Imaging)) {
                 addAppointmentToTableView(apt);
-                printLog(apt.toString());
             }
         }
-        printLog("** end of list **");
     }
 
     /**
@@ -1101,15 +1091,11 @@ public class ClinicManagerController {
         }
         Sort.sort(appointmentList, "location");
         appointmentViews.clear();
-        printLog("** List of radiology appointments ordered by county/date/time.");
         for (Appointment apt : appointmentList) {
             if (apt instanceof Imaging) {
                 addAppointmentToTableView(apt);
-                Imaging imagingApt = (Imaging) apt;
-                printLog(imagingApt.toString());
             }
         }
-        printLog("** end of list **");
     }
 
     /**
@@ -1125,20 +1111,15 @@ public class ClinicManagerController {
             printLog("Schedule calendar is empty.");
             return;
         }
-        printLog("** Billing statement ordered by patient. **");
         for (int i = 0; i < medicalRecord.size(); i++) {
-            int patientNum = i + 1;
-            String patientInfo = medicalRecord.get(i).billingInfo();
             // Add the billing record to table view...
             String person = medicalRecord.get(i).getProfile().toString();
-            String fund = "$" + String.valueOf(medicalRecord.get(i).charge());
+            String fund = "$" + medicalRecord.get(i).charge();
             FundView fundView = new FundView(person, fund);
             fundViews.add(fundView);
-            printLog("(" + patientNum + ")" + " " + patientInfo);
         }
-        printLog("** end of list **");
         // Empty the list once command finishes...
-        appointmentList = new List<Appointment>();
+        appointmentList = new List<>();
         appointmentViews.clear();
     }
 
@@ -1156,28 +1137,18 @@ public class ClinicManagerController {
         }
         // Sort providers by profile...
         Sort.sort(providersList);
-        printLog("** Credit amount ordered by provider. **");
         for (int i = 0; i < providersList.size(); i++) {
-            int providerNum = i + 1;
             Provider provider = providersList.get(i);
-            int credit = computeProviderCredit(provider);
-            DecimalFormat deci = new DecimalFormat("#,###.00");
-            String creditStr = deci.format(credit);
-            if (credit == 0) {
-                creditStr = "0.00";
-            }
+            // Add the billing record to table view...
             String fname = provider.getProfile().getFirstName();
             String lname = provider.getProfile().getLastName();
             String dob = provider.getProfile().getDob().toString();
             String providerInfo = fname + " " + lname + " " + dob;
-            // Add the billing record to table view...
-            String fund = "$" + String.valueOf(credit);
+            int credit = computeProviderCredit(provider);
+            String fund = "$" + credit;
             FundView fundView = new FundView(providerInfo, fund);
             fundViews.add(fundView);
-            printLog("(" + providerNum + ") " +
-                    providerInfo + " [credit amount: $" + creditStr + "]");
         }
-        printLog("** end of list **");
     }
 
     /**
@@ -1295,17 +1266,6 @@ public class ClinicManagerController {
     }
 
     /**
-     * Prints all elements of the list in a column.
-     * @param list The generic list.
-     */
-    @FXML
-    private void print(List list) {
-        for (int i = 0; i < list.size(); i++) {
-            printLog(list.get(i).toString());
-        }
-    }
-
-    /**
      * Prints text to the UI text area for logging events.
      * @param text The text to print.
      */
@@ -1333,18 +1293,18 @@ public class ClinicManagerController {
         String date = apt.getDate().toString();
         String timeslot = apt.getTimeslot().toString();
         String patient = apt.getPatient().toString();
-        String location = null;
-        String room = null;
-        String cost = null;
+        String location;
+        String room;
+        String cost;
         if (apt instanceof Imaging) {
             location = ((Technician) apt.getProvider()).getLocation().toString();
             room = ((Imaging) apt).getRoom().toString();
-            cost = "$" + String.valueOf(((Technician) apt.getProvider()).rate());
+            cost = "$" + ((Technician) apt.getProvider()).rate();
         }
         else {
             location = ((Doctor) apt.getProvider()).getLocation().toString();
             room = "N/A";
-            cost = "$" + String.valueOf(((Doctor) apt.getProvider()).rate());
+            cost = "$" + ((Doctor) apt.getProvider()).rate();
         }
         AppointmentView appointmentView = new AppointmentView(date, timeslot, patient, location, room, cost);
         appointmentViews.add(appointmentView);

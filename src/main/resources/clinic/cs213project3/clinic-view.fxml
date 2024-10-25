@@ -317,12 +317,12 @@
                         </GridPane>
                         <TableView fx:id="appointmentTableView" layoutY="97.0" prefHeight="235.0" prefWidth="428.0">
                            <columns>
-                              <TableColumn fx:id="dateColumn" prefWidth="60.79999542236328" text="Date" />
-                              <TableColumn fx:id="timeslotColumn" prefWidth="72.00006103515625" text="Timeslot" />
-                              <TableColumn fx:id="patientColumn" prefWidth="67.99993896484375" text="Patient" />
-                              <TableColumn fx:id="appointmentLocationColumn" prefWidth="79.19999694824219" text="Location" />
-                              <TableColumn fx:id="roomColumn" prefWidth="76.0" text="Room" />
-                              <TableColumn fx:id="costColumn" minWidth="0.0" prefWidth="64.0" text="Cost" />
+                              <TableColumn fx:id="dateColumn" prefWidth="63.20001411437988" text="Date" />
+                              <TableColumn fx:id="timeslotColumn" prefWidth="69.59996795654297" text="Timeslot" />
+                              <TableColumn fx:id="patientColumn" prefWidth="74.39996337890625" text="Patient" />
+                              <TableColumn fx:id="appointmentLocationColumn" prefWidth="87.20001220703125" text="Location" />
+                              <TableColumn fx:id="roomColumn" prefWidth="72.79998779296875" text="Room" />
+                              <TableColumn fx:id="costColumn" minWidth="0.0" prefWidth="55.20001220703125" text="Cost" />
                            </columns>
                         </TableView>
                      </children>
@@ -335,8 +335,8 @@
                      <children>
                         <TableView fx:id="providerTableView" layoutY="14.0" prefHeight="318.0" prefWidth="428.0">
                            <columns>
-                              <TableColumn fx:id="nameColumn" prefWidth="79.20001602172852" text="Name" />
-                              <TableColumn fx:id="typeColumn" prefWidth="86.39996337890625" text="Type" />
+                              <TableColumn fx:id="nameColumn" prefWidth="87.19995307922363" text="Name" />
+                              <TableColumn fx:id="typeColumn" prefWidth="79.20000457763672" text="Type" />
                               <TableColumn fx:id="locationColumn" prefWidth="91.99998474121094" text="Location" />
                               <TableColumn fx:id="specialtyColumn" prefWidth="94.39996337890625" text="Specialty" />
                               <TableColumn fx:id="rateColumn" prefWidth="68.0" text="Rate" />
