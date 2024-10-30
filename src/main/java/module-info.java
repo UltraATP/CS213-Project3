@@ -6,4 +6,6 @@ module clinic.cs213project3 {
 
     opens clinic.cs213project3 to javafx.fxml;
     exports clinic.cs213project3;
+    exports clinic.cs213project3.view;
+    opens clinic.cs213project3.view to javafx.fxml;
 }

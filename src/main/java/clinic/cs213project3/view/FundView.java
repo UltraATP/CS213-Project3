@@ -1,4 +1,4 @@
-package clinic.cs213project3;
+package clinic.cs213project3.view;
 
 /**
  * The template class used to display billing/credit data onto the table view in the UI.
